@@ -26,24 +26,63 @@ const participantes = [
     "Damazo Sepúlveda"
 ];
 
-const colores = [
-    "rojo",
-    "azul",
-    "verde"
-];
+const participantesBackUp = [];
 
-// Función genérica para obtener elemento aleatorio de cualquier arreglo
-function aleatorioDesdeArreglo(arreglo) {
-    if (arreglo.length === 0) return null;
-    const indice = Math.floor(Math.random() * arreglo.length);
-    return arreglo[indice];
+function lanzarRuleta(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min
 }
-const getRandomButton = document.querySelector("#getrandom");
-const resultadoElement = document.querySelector("#resultado");
 
-getRandomButton.addEventListener("click", () => {
-    const ganador = aleatorioDesdeArreglo(participantes);
-    const colorAleatorio = aleatorioDesdeArreglo(colores);
-    resultadoElement.textContent = `Ganador: ${ganador} - Color: ${colorAleatorio}`;
-    console.log(ganador);
+function aleatorioDesdeArreglo(arreglo) {
+    if (arreglo.length === 0) {
+        renderizarResultado("¡Ya salieron todos! 🎉")
+        setTimeout(() => window.location.reload(), 3000)
+        return
+    }
+
+    const index = lanzarRuleta(0, arreglo.length - 1)
+    const elementoArreglo = arreglo[index]
+
+    participantes.splice(participantes.indexOf(elementoArreglo), 1)
+    participantesBackUp.push(elementoArreglo)
+
+    return elementoArreglo
+}
+
+function renderizarResultado(texto) {
+    document.getElementById("resultado").textContent = texto
+}
+
+function actualizarContador() {
+    document.getElementById("contador").textContent =
+        `Quedan ${participantes.length} de ${participantes.length + participantesBackUp.length}`
+}
+
+function renderizarLista() {
+    const lista = document.getElementById("lista-pendientes")
+    lista.innerHTML = ""
+
+    participantes.forEach(nombre => {
+        const li = document.createElement("li")
+        li.textContent = nombre
+        lista.appendChild(li)
+    })
+
+    participantesBackUp.forEach(nombre => {
+        const li = document.createElement("li")
+        li.textContent = nombre
+        li.className = "ya-salio"
+        lista.appendChild(li)
+    })
+}
+
+renderizarLista()
+actualizarContador()
+
+document.querySelector("#getRandom").addEventListener("click", () => {
+    const resultado = aleatorioDesdeArreglo(participantes)
+    if (resultado) {
+        renderizarResultado("🎯 " + resultado)
+        renderizarLista()
+        actualizarContador()
+    }
 })
